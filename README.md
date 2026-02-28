@@ -2,6 +2,7 @@
 
 AutoTube-n8n is a fully automated content pipeline built in n8n. It transforms raw ideas from a Google Sheet into fully rendered videos with AI-generated scripts and music, then uploads them directly to YouTube without any manual intervention.
 
+
 🚀 Features
 1.Scheduled Execution: The "Schedule" node checks for new content every hour.
 
@@ -17,6 +18,8 @@ AutoTube-n8n is a fully automated content pipeline built in n8n. It transforms r
 
 7.Error Handling: Failed renders are logged back to a "errors" sheet for easy debugging.
 
+
+
 🛠️ Tech Stack
 Workflow Engine: n8n
 
@@ -27,6 +30,7 @@ Database: Google Sheets
 Video Engine: Json2Video API
 
 Platform: YouTube Data API
+
 
 
 📦 Quick Setup
