@@ -1,0 +1,432 @@
+{
+  "name": "AI Video Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        }
+      },
+      "id": "667c4586-ef83-42cf-81cf-25181c873df6",
+      "name": "Schedule",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        -912,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"status\"]}}",
+              "value2": "pending"
+            }
+          ]
+        }
+      },
+      "id": "c5f09319-759b-4454-814b-904336f0a19d",
+      "name": "Filter Pending",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "operation": "create",
+        "requestOptions": {}
+      },
+      "id": "cc175829-a790-4a09-9709-efefc5e6087f",
+      "name": "Generate Script",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        336
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "aHcmQ8lP5V4G0PAq",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sheetId": "YOUR_SHEET_ID",
+        "range": "music!A:B",
+        "options": {}
+      },
+      "id": "be24142b-5635-4b13-b1de-9da21fb80f67",
+      "name": "Get Music",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [
+        -64,
+        336
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "6B46RGDJ5q010y9b",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "items[0].json.music = items[Math.floor(Math.random()*items.length)].json.url;\nreturn items;"
+      },
+      "id": "277cd21e-1837-4f5c-aefa-7a0d1b664b01",
+      "name": "Pick Random Music",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        144,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.json2video.com/v2/movies",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{$json[\"title\"]}}"
+            },
+            {
+              "name": "script",
+              "value": "={{$json[\"script\"]}}"
+            },
+            {
+              "name": "music",
+              "value": "={{$json[\"music\"]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4e9b6ddd-6d02-4579-8f7e-b82ffd8f1002",
+      "name": "Create Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        336,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 30,
+        "unit": "seconds"
+      },
+      "id": "07eaea5d-520b-4029-9367-783337c93a20",
+      "name": "Wait Render",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        544,
+        336
+      ],
+      "webhookId": "7814058c-f4ea-41cf-b555-8d9a0d8aad90"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.json2video.com/v2/movies/{{$json[\"id\"]}}",
+        "options": {}
+      },
+      "id": "b176b585-6a28-4825-bc2b-0f356c50aeb5",
+      "name": "Check Render Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        736,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"status\"]}}",
+              "value2": "done"
+            }
+          ]
+        }
+      },
+      "id": "aa962fb4-695c-44c9-b738-e1ca78c781c0",
+      "name": "Render Complete?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        944,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{$json[\"video_url\"]}}",
+        "options": {}
+      },
+      "id": "4be71adb-aab9-40a2-bc0e-bd3de98aadba",
+      "name": "Download Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1136,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upload"
+      },
+      "id": "1bbab415-323e-4370-8304-785ef4b0208f",
+      "name": "Upload YouTube",
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        224
+      ],
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "31LnJWJmZBRRBlgK",
+          "name": "YouTube account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "sheetId": "YOUR_SHEET_ID",
+        "range": "queue!A:F",
+        "options": {}
+      },
+      "id": "5b16b5e8-051a-4e71-97e7-06acb1d4061d",
+      "name": "Update Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [
+        1536,
+        224
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "6B46RGDJ5q010y9b",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "sheetId": "YOUR_SHEET_ID",
+        "range": "errors!A:C",
+        "options": {}
+      },
+      "id": "8cc0fb2a-50d2-495f-b0b4-d075ba73cb3f",
+      "name": "Error Log",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [
+        1136,
+        448
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "6B46RGDJ5q010y9b",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sheetId": "1LOtmOcEzDj5y9BQJJOlcyHnw1ZvRZ-OduhaSgNrmus8",
+        "options": {}
+      },
+      "id": "b717eae0-fec7-4c7c-b096-478f8ce7149b",
+      "name": "Read",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [
+        -688,
+        336
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "tfccqwwzS5xnzpX2",
+          "name": "Google Sheets account 3"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule": {
+      "main": [
+        [
+          {
+            "node": "Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Pending": {
+      "main": [
+        [
+          {
+            "node": "Generate Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Script": {
+      "main": [
+        [
+          {
+            "node": "Get Music",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Music": {
+      "main": [
+        [
+          {
+            "node": "Pick Random Music",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Random Music": {
+      "main": [
+        [
+          {
+            "node": "Create Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Video": {
+      "main": [
+        [
+          {
+            "node": "Wait Render",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Render": {
+      "main": [
+        [
+          {
+            "node": "Check Render Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Render Status": {
+      "main": [
+        [
+          {
+            "node": "Render Complete?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Render Complete?": {
+      "main": [
+        [
+          {
+            "node": "Download Video",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Video": {
+      "main": [
+        [
+          {
+            "node": "Upload YouTube",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload YouTube": {
+      "main": [
+        [
+          {
+            "node": "Update Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read": {
+      "main": [
+        [
+          {
+            "node": "Filter Pending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "657e61f7-423e-4f28-8d12-ffee0d0317fd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "77d3781eb13928dfe3332e4dc10afd3cdf52874f24c4f3ac25d9c041817c342c"
+  },
+  "id": "Rk0f06LL7DGRufvu",
+  "tags": []
+}
