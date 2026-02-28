@@ -1,4 +1,5 @@
-#🤖 AutoTube-n8n: Autonomous AI Video Agent
+🤖 AutoTube-n8n: Autonomous AI Video Agent
+
 AutoTube-n8n is a fully automated content pipeline built in n8n. It transforms raw ideas from a Google Sheet into fully rendered videos with AI-generated scripts and music, then uploads them directly to YouTube without any manual intervention.
 
 🚀 Features
